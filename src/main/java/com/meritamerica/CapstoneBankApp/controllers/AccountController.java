@@ -1,5 +1,5 @@
 package com.meritamerica.CapstoneBankApp.controllers;
 
-public class AccountHolderController {
+public class AccountController {
 
 }

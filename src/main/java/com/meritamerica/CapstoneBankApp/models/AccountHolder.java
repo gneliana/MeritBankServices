@@ -67,6 +67,10 @@ public class AccountHolder {
 	// an AccountHolder may have numerous CDAccounts, but each list of CDAccounts can only have 1 AccountHolder (one-to-many)
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "accountHolder", fetch = FetchType.LAZY)
 	private List<CDAccount> cdAccounts;
+	
+	// an AccountHolder may have numerous CDAccounts, but each list of CDAccounts can only have 1 AccountHolder (one-to-many)
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "accountHolder", fetch = FetchType.LAZY)
+	private List<Transaction> transactions;
 
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "users_id")
@@ -185,8 +189,32 @@ public class AccountHolder {
 	public void setUser(User user) {
 		this.user = user;
 	}
+	
+	
+	
+	
 	//---- get combined balances & number of accounts---
 	
+	public List<DBAChecking> getDbaCheckingAccounts() {
+		return dbaCheckingAccounts;
+	}
+
+
+	public void setDbaCheckingAccounts(List<DBAChecking> dbaCheckingAccounts) {
+		this.dbaCheckingAccounts = dbaCheckingAccounts;
+	}
+
+
+	public List<Transaction> getTransactions() {
+		return transactions;
+	}
+
+
+	public void setTransactions(List<Transaction> transactions) {
+		this.transactions = transactions;
+	}
+
+
 	// get number of savings 
 	public int getNumberOfSavingsAccounts() {
 		if (savingsAccounts != null) {

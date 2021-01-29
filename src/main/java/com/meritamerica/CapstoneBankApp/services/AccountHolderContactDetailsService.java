@@ -30,4 +30,9 @@ public class AccountHolderContactDetailsService {
 		}
 		return repository.findById(id).orElse(null);
 	}
+
+	// return list of all accounts service
+	public List<AccountHolderContactDetails> findAllAccounts() {
+		return repository.findAll();
+	}
 }

@@ -72,7 +72,7 @@ public class UserService  {
 		return accountHolder.getDBACheckingAccounts();
 	}
 	
-	public List<PersonalChecking> getMyCheckingAccounts(HttpServletRequest request) {
+	public List<PersonalChecking> getMyPersonalCheckingAccounts(HttpServletRequest request) {
 		AccountHolder accountHolder = getMyAccountInfo(request);
 		return accountHolder.getPersonalCheckingAccounts();
 	}
