@@ -18,4 +18,6 @@ public class RegisterUserService {
 	private MyUserDetailsService myUserService;
 	@Autowired
 	private JwtUtil jwtUtil;
+	
+	
 }

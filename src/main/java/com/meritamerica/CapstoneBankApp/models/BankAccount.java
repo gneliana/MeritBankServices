@@ -1,6 +1,5 @@
 package com.meritamerica.CapstoneBankApp.models;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 import javax.persistence.*;
@@ -10,7 +9,13 @@ import org.hibernate.annotations.DiscriminatorOptions;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.meritamerica.CapstoneBankApp.exceptions.AccountNotFoundException;
 import com.meritamerica.CapstoneBankApp.exceptions.NegativeBalanceException;
+import com.meritamerica.CapstoneBankApp.services.TransactionService;
+
+
+
+//*** ADD closeAccount method
 
 //Directions hinted at using @MappedSuperClass, however, using @Entity/@inheritance allows each subclass to be a table
 @Entity(name = "BankAccount")
@@ -28,19 +33,26 @@ public abstract class BankAccount {
 	@Min(value = 0, message = "Cannot have negative balance.")
 	double balance;
 	
-	// uses local date - will only be valuable if info is input same day, and also locally
 	private Date dateOpened;
-	private int maxAccountsAllowed;
+	private int maxAccountsAllowed; //each acct type has a limit on number each user may hold
 	
 	@DecimalMin("0.0")
 	@DecimalMax("0.999999")
 	private double interestRate;
 	
+	private TransactionService transactionService;
 	
-	// join BankAccount to Account Holder
+//	// join BankAccount to Account Holder
+//	@ManyToOne
+//	@JoinColumn(name = "accountHolder_id")  
+//	private AccountHolder accountHolder;
+
+	// join BankAccount to User
 	@ManyToOne
-	@JoinColumn(name = "accountHolder_id")  
-	private AccountHolder accountHolder;
+	@JoinColumn(name = "users_id")  
+	private User user;
+	
+	
 	
 	// default constructor
 	public BankAccount(){		
@@ -59,13 +71,22 @@ public abstract class BankAccount {
 
 	//----------Getters/Setters
 	
+//	@JsonBackReference  // gets rid of infinite recursion
+//	public AccountHolder getAccountHolder() {
+//		return accountHolder;
+//	}
+//	public void setAccountHolder(AccountHolder accountHolder) {
+//		this.accountHolder = accountHolder;
+//	}	
+	
+	
 	@JsonBackReference  // gets rid of infinite recursion
-	public AccountHolder getAccountHolder() {
-		return accountHolder;
+	public User getUser() {
+		return user;
 	}
-	public void setAccountHolder(AccountHolder accountHolder) {
-		this.accountHolder = accountHolder;
-	}	
+	public void setUser(User user) {
+		this.user = user;
+	}
 	public Integer getId() {
 		return id;
 	}
@@ -84,18 +105,15 @@ public abstract class BankAccount {
 	public void setDateOpened(Date dateOpened) {
 		this.dateOpened = dateOpened;
 	}
-
 	public double getInterestRate() {
 		return interestRate;
 	}
 	public void setInterestRate(double interestRate) {
 		this.interestRate = interestRate;
 	}
-
 	public int getMaxAccountsAllowed() {
 		return maxAccountsAllowed;
 	}
-
 	public void setMaxAccountsAllowed(int maxAccountsAllowed) {
 		this.maxAccountsAllowed = maxAccountsAllowed;
 	}
@@ -104,49 +122,52 @@ public abstract class BankAccount {
 	
 	// ------ TRANSACTIONS -----
 	
-    public void withdraw(double amount) throws NegativeBalanceException {
-        if(amount > this.balance) {
-            throw new NegativeBalanceException("Amount exceeds available balance");
-        } 
-         if(amount < 0) {
-            throw new NegativeBalanceException("Cannot withdraw negative amount");
-        }
-        this.balance -= amount;
-    }
-
-    public void deposit(double amount) throws NegativeBalanceException {
-      
-       if(amount < 0) {
-          throw new NegativeBalanceException("Cannot deposit negative amount");
-      }
-      this.balance += amount;
-    }
-	
-	protected Transaction simpleTransaction(Transaction transaction) throws NegativeBalanceException {
-		
-			if(transaction.getAmount() > 0){
-				this.deposit(transaction.getAmount());
-			}
-			// turn number negative
-			if(transaction.getAmount() < 0) {
-				this.withdraw(-1 * transaction.getAmount());
-			}
-
-		return transaction;
-	}
-	
-	protected Transaction multipleAccountTransaction(Transaction transaction, BankAccount sourceAccount, BankAccount targetAccount) {
-		boolean success = false;
-		
+	public Transaction transactionType(BankAccount sourceAccount, BankAccount targetAccount, Transaction transaction) {
 		try {
-			sourceAccount.withdraw(transaction.getAmount());
-			success = true;
-			targetAccount.deposit(transaction.getAmount());
-		} catch (Exception e) {
-			if(success) {
-				sourceAccount.setBalance(sourceAccount.getBalance() + transaction.getAmount());
-			}
+			transaction = transactionService.transactionType(sourceAccount, targetAccount, transaction);
+		} catch (NegativeBalanceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return transaction;
+	}	
+	public Transaction simpleTransaction(BankAccount targetAccount, Transaction transaction) throws NegativeBalanceException {
+		try {
+			transaction = transactionService.simpleTransaction(targetAccount, transaction);
+		} catch (NegativeBalanceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return transaction;
+	}	
+	public Transaction transferTransaction(BankAccount sourceAccount, BankAccount targetAccount, Transaction transaction) {
+		transaction = transactionService.transferTransaction(sourceAccount, targetAccount, transaction);
+		return transaction;
+	}	
+	public void withdraw(BankAccount targetAccount, double amount) throws NegativeBalanceException {
+		try {
+			transactionService.withdraw(targetAccount, amount);
+		} catch (NegativeBalanceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public void deposit(BankAccount targetAccount, double amount) {
+		try {
+			transactionService.deposit(targetAccount, amount);
+		} catch (NegativeBalanceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public Transaction addTransaction(Transaction transaction, Integer id) {
+		try {
+			transactionService.addTransaction(transaction, id);
+		} catch (AccountNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return transaction;
 	}
+	
 }

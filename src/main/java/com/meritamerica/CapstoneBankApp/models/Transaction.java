@@ -7,10 +7,10 @@ import javax.persistence.ManyToOne;
 
 public class Transaction {
 
-	private long id;
+	private Integer id;
 	
-	private long sourceAccount;
-	private long targetAccount;
+	private Integer sourceAccount;
+	private Integer targetAccount;
 	private Date transactionDate;
 	private double amount;
 	private String returnMessage;
@@ -20,8 +20,8 @@ public class Transaction {
 	
 	// join Transaction to Account Holder
 	@ManyToOne
-	@JoinColumn(name = "accountHolder_id")  
-	private AccountHolder accountHolder;
+	@JoinColumn(name = "users_id")  
+	private User user;
 
 	public Transaction(Date transactionDate, double amount, String returnMessage) {
 		super();
@@ -30,27 +30,27 @@ public class Transaction {
 		this.returnMessage = "";
 	}
 
-	public long getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
-	public long getSourceAccount() {
+	public Integer getSourceAccount() {
 		return sourceAccount;
 	}
 
-	public void setSourceAccount(long sourceAccount) {
+	public void setSourceAccount(Integer sourceAccount) {
 		this.sourceAccount = sourceAccount;
 	}
 
-	public long getTargetAccount() {
+	public Integer getTargetAccount() {
 		return targetAccount;
 	}
 
-	public void setTargetAccount(long targetAccount) {
+	public void setTargetAccount(Integer targetAccount) {
 		this.targetAccount = targetAccount;
 	}
 
@@ -94,12 +94,12 @@ public class Transaction {
 		this.success = success;
 	}
 
-	public AccountHolder getAccountHolder() {
-		return accountHolder;
+	public User getUser() {
+		return user;
 	}
 
-	public void setAccountHolder(AccountHolder accountHolder) {
-		this.accountHolder = accountHolder;
+	public void setUser(User user) {
+		this.user = user;
 	}	
 	
 	

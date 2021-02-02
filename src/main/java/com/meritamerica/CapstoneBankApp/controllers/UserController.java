@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,14 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.meritamerica.CapstoneBankApp.exceptions.ExceedsCombinedBalanceLimitException;
 import com.meritamerica.CapstoneBankApp.exceptions.OfferingNotFoundException;
-import com.meritamerica.CapstoneBankApp.models.AccountHolder;
 import com.meritamerica.CapstoneBankApp.models.CDAccount;
+import com.meritamerica.CapstoneBankApp.models.CDOffering;
 import com.meritamerica.CapstoneBankApp.models.DBAChecking;
 import com.meritamerica.CapstoneBankApp.models.PersonalChecking;
 import com.meritamerica.CapstoneBankApp.models.SavingsAccount;
-import com.meritamerica.CapstoneBankApp.models.SignupRequest;
-import com.meritamerica.CapstoneBankApp.services.MyUserDetailsService;
-import com.meritamerica.CapstoneBankApp.services.RegisterUserService;
+import com.meritamerica.CapstoneBankApp.models.User;
 import com.meritamerica.CapstoneBankApp.services.UserService;
 
 @RestController 
@@ -36,22 +33,30 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
-	@Autowired
-	private RegisterUserService registerUserService;
 	
 	
-	@PreAuthorize("hasAuthority('admin')")
-	@PostMapping("/authenticate/createUser")
-	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-		return registerUserService.registerUser(signUpRequest);
-	}	
+	// --moved this method to admin controller
+//	@Autowired
+//	private RegisterUserService registerUserService;
+//	
+//	
+//	@PreAuthorize("hasAuthority('admin')")
+//	@PostMapping("/authenticate/createUser")
+//	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+//		return registerUserService.registerUser(signUpRequest);
+//	}	
+//	
+	
+	// manditory authentication for URLs due to spring security
 	
 	@PreAuthorize("hasAuthority('AccountHolder')")
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = "/Me")
-	public AccountHolder getMyAccountInfo(HttpServletRequest request) {
+	public User getMyAccountInfo(HttpServletRequest request) {
 		return userService.getMyAccountInfo(request);
 	}
+	
+	
 	
 	@PreAuthorize("hasAuthority('AccountHolder')")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -104,7 +109,7 @@ public class UserController {
 	@PostMapping(value = "/Me/CDAccount")
 	public CDAccount postMyCDAccount(HttpServletRequest request, @Valid @RequestBody CDAccount cdAccount)
 												throws ExceedsCombinedBalanceLimitException {
-		return userService.postMyCdSavingsAccount(request, cdAccount);
+		return userService.postMyCdAccount(request, cdAccount);
 	}
 	
 	@PreAuthorize("hasAuthority('AccountHolder')")
@@ -113,6 +118,7 @@ public class UserController {
 	public List<CDAccount> getMyCdAccounts(HttpServletRequest request) {
 		return userService.getMyCdAccounts(request);
 	}
+	
 	
 	
 	// future value
@@ -126,4 +132,23 @@ public class UserController {
 		futureVal = Math.floor(futureVal * 100);
 		return futureVal/100;
 	}
+	
+	
+	
+	//best cd offer
+	@PreAuthorize("hasAuthority('AccountHolder')")
+	@ResponseStatus(HttpStatus.OK)
+	@GetMapping(value = "/BestOffer")
+	public CDOffering getBestOffer(@RequestBody List<CDOffering> offerings) {
+		return userService.getBestOffering(offerings);
+	}
+	
+	//2nd best cd offer
+	@PreAuthorize("hasAuthority('AccountHolder')")
+	@ResponseStatus(HttpStatus.OK)
+	@GetMapping(value = "/SecondBestOffer")
+	public CDOffering getSecondBestOffer(@RequestBody List<CDOffering> offerings) {
+		return userService.getSecondBestOffering(offerings);
+	}
+	
 }

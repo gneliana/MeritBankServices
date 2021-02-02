@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.meritamerica.CapstoneBankApp.exceptions.AccountNotFoundException;
 import com.meritamerica.CapstoneBankApp.models.AccountHolder;
 import com.meritamerica.CapstoneBankApp.models.CDAccount;
+import com.meritamerica.CapstoneBankApp.models.User;
 import com.meritamerica.CapstoneBankApp.repositories.CDAccountRepository;
 
 //**This class is specifically for the tasks of adding/searching the CD Account database**
@@ -19,19 +20,19 @@ public class CDAccountService {
 	@Autowired // creates variables for this instance
 	private CDAccountRepository repository;         // constructor needed to update/search databases
 	@Autowired 
-	private AccountHolderService holderService;		// constructor needed to find holder by id
+	private UserService userService;		// constructor needed to find holder by id
 
 	// add cd account to database
 	public CDAccount addAccount(CDAccount account, Integer id) throws AccountNotFoundException {
-		AccountHolder holder = holderService.findById(id);   // use id given to locate holder
+		User holder = userService.findById(id);   // use id given to locate holder
 		holder.setCdAccounts(Arrays.asList(account));  		 // use Arrays class to convert array of account to List 
-		account.setAccountHolder(holder);  					 // set list of cd accounts to belong to holder
+		account.setUser(holder);  					 // set list of cd accounts to belong to holder
 		repository.save(account);							 // add given account to that holder's list of cd accounts
 		return account;
 	}
 
 	// show all of this holder's cd accounts
 	public List<CDAccount> findAccounts(Integer id) throws AccountNotFoundException {
-		return holderService.findById(id).getCdAccounts();
+		return userService.findById(id).getCdAccounts();
 	}
 }

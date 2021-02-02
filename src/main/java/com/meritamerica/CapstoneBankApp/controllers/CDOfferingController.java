@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.meritamerica.CapstoneBankApp.exceptions.OfferingNotFoundException;
@@ -25,6 +26,7 @@ public class CDOfferingController {
 	CDOfferingService offeringService;  
 	
 	// add cd offering
+	@PreAuthorize("hasAuthority('admin')")
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(value = "/CDOfferings")
 	public CDOffering addCdOffering(@Valid @RequestBody CDOffering offering) {
@@ -33,6 +35,7 @@ public class CDOfferingController {
 	}
 	
 	// get all cd offerings
+	@PreAuthorize("hasAuthority('admin') or hasAuthority('AccountHolder')")
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = "CDOfferings")
 	public List<CDOffering> getOfferings() {
@@ -40,6 +43,7 @@ public class CDOfferingController {
 	}
 	
 	// get an offering by its id
+	@PreAuthorize("hasAuthority('admin') or hasAuthority('AccountHolder')")
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = "CDOfferings/{id}")
 	public CDOffering getOfferingById(@PathVariable Integer id) throws OfferingNotFoundException {

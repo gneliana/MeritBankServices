@@ -13,4 +13,5 @@ public class SavingsAccount extends BankAccount {
 		super();
 		super.setInterestRate(INTEREST_RATE);		
 	}
+	
 }
